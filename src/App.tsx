@@ -19,7 +19,7 @@ function App() {
   return (
     <>
       <NavBar />
-      <div>
+      <div className="page">
         <Page></Page>
       </div>
     </>

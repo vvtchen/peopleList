@@ -4,19 +4,20 @@ type FormState = {
   name: string;
   position: string;
   department: string;
-  eduaction: string;
+  education: string;
   degree: string;
   email: string;
   address: string;
   postalCode: number | null;
 };
+const API_ENDPOINT = "http://127.0.0.1:8000/api/";
 
 function CreateNew() {
   const [formState, setFormState] = useState<FormState>({
     name: "",
     position: "",
     department: "",
-    eduaction: "",
+    education: "",
     degree: "",
     email: "",
     address: "",
@@ -33,14 +34,27 @@ function CreateNew() {
     }
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log(formState);
+    // const csrf = getCookie("csrftoken");
+
+    const response = await fetch(`${API_ENDPOINT}createNew`, {
+      method: "POST",
+      body: JSON.stringify(formState),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const result = await response.json();
+    if (result.success) {
+      window.location.pathname = "/";
+    }
+
     // Handle form submission logic here (e.g., API call)
   };
 
   return (
-    <>
+    <div>
       <h1>新增人員</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
@@ -83,14 +97,14 @@ function CreateNew() {
           />
         </div>
         <div className="mb-3">
-          <label htmlFor="eduaction" className="form-label">
+          <label htmlFor="education" className="form-label">
             學歷
           </label>
           <input
             type="text"
             className="form-control"
-            name="eduaction"
-            id="eduaction"
+            name="education"
+            id="education"
             onChange={handleChange}
             required
           />
@@ -152,7 +166,7 @@ function CreateNew() {
           Submit
         </button>
       </form>
-    </>
+    </div>
   );
 }
 

@@ -1,66 +1,109 @@
 import { IconButton } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faExternalLink } from "@fortawesome/free-solid-svg-icons";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { useState, useEffect } from "react";
+import ModalForm from "./Modal";
 
-type Person = {
-  id: number;
-  name: string;
-  position: string;
-  department: string;
-  eduaction: string;
-  degree: string;
-  email: string;
-  address: string;
-  postalCode: number;
-};
-
-function handleButtonClick(
-  action: "delete" | "edit",
-  personData: Person
-): void {
-  if (action === "delete") {
-    console.log("Delete action called for:", personData);
-    // Delete logic goes here
-  } else if (action === "edit") {
-    console.log("Edit action called for:", personData);
-    // Edit logic goes here
-  }
+interface Person {
+  model: string;
+  pk: number;
+  fields: {
+    name: string;
+    position: string;
+    department: string;
+    education: string;
+    degree: string;
+    email: string;
+    address: string;
+    postalCode: number;
+  };
 }
 
+const API_ENDPOINT = "http://127.0.0.1:8000/api/";
+
 function ListGroup() {
-  let lists: Person[] = [
-    {
-      id: 1,
-      name: "John",
-      position: "國內業務",
-      department: "業務部",
-      eduaction: "中興大學",
-      degree: "企業管理",
-      email: "abc@gmail.com",
-      address: "桃園市一路3號",
-      postalCode: 337,
-    },
-    {
-      id: 1,
-      name: "John",
-      position: "國內業務",
-      department: "業務部",
-      eduaction: "中興大學",
-      degree: "企業管理",
-      email: "abc@gmail.com",
-      address: "桃園市一路3號",
-      postalCode: 337,
-    },
-  ];
+  const [lists, setLists] = useState<Person[]>([]);
+
+  async function handleDeleteClick(pk: number): Promise<void> {
+    const check = window.confirm("確定是否要刪除此筆資料？");
+    if (check) {
+      console.log("Delete action called for:", pk);
+      const response = await fetch(`${API_ENDPOINT}delete/${pk}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(`error: ${error.message}`);
+      }
+      const result = await response.json();
+      console.log(result); // {success:true}
+      if (result.success) {
+        setLists(lists.filter((person) => person.pk !== pk));
+      } else {
+        console.log("Failed to delete");
+      }
+    }
+  }
+
+  type UpdateProps = {
+    pk: number;
+    name: string;
+    position: string;
+    department: string;
+    education: string;
+    degree: string;
+    email: string;
+    address: string;
+    postalCode: number;
+  };
+
+  const handleUpdateClick = (
+    target: Partial<UpdateProps>,
+    pk: number
+  ): void => {
+    const updatedLists = lists.map((person) => {
+      if (person.pk === pk) {
+        return {
+          ...person,
+          fields: {
+            ...person.fields,
+            ...target,
+          },
+        };
+      }
+      return person;
+    });
+
+    setLists(updatedLists);
+  };
+
+  useEffect(() => {
+    fetch(API_ENDPOINT + "all")
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setLists(data);
+        } else {
+          throw new Error("Data format is incorrect");
+        }
+      })
+      .catch((error) => {
+        console.error(
+          "There was a problem with the fetch operation:",
+          error.message
+        );
+      });
+  }, []);
 
   return (
-    <>
+    <div>
       <h1>人員名單</h1>
-      {lists.length === 0 && <p>目前無人員資料</p>}
 
       <table className="table">
         <thead>
-          <tr>
+          <tr className="table-primary">
             <th scope="col">ID</th>
             <th scope="col">姓名</th>
             <th scope="col">職稱</th>
@@ -75,39 +118,44 @@ function ListGroup() {
         </thead>
         <tbody>
           {lists.map((people) => (
-            <tr>
-              <th scope="row">{people.id}</th>
-              <th scope="row">{people.name}</th>
-              <th scope="row">{people.position}</th>
-              <th scope="row">{people.department}</th>
-              <th scope="row">{people.eduaction}</th>
-              <th scope="row">{people.degree}</th>
-              <th scope="row">{people.email}</th>
-              <th scope="row">{people.address}</th>
-              <th scope="row">{people.postalCode}</th>
+            <tr key={people.pk}>
+              <th scope="row">{people.pk}</th>
+              <th scope="row">{people.fields.name}</th>
+              <th scope="row">{people.fields.position}</th>
+              <th scope="row">{people.fields.department}</th>
+              <th scope="row">{people.fields.education}</th>
+              <th scope="row">{people.fields.degree}</th>
+              <th scope="row">{people.fields.email}</th>
+              <th scope="row">{people.fields.address}</th>
+              <th scope="row">{people.fields.postalCode}</th>
               <th scope="row">
                 <IconButton
                   aria-label="delete"
                   size="small"
                   color="error"
-                  onClick={() => handleButtonClick("delete", people)}
+                  onClick={() => handleDeleteClick(people.pk)}
                 >
                   <FontAwesomeIcon icon={faTrash} />
                 </IconButton>
-                <IconButton
-                  aria-label="edit"
-                  size="small"
-                  color="primary"
-                  onClick={() => handleButtonClick("edit", people)}
-                >
-                  <FontAwesomeIcon icon={faExternalLink} />
-                </IconButton>
+
+                <ModalForm
+                  pk={people.pk}
+                  name={people.fields.name}
+                  position={people.fields.position}
+                  department={people.fields.department}
+                  education={people.fields.education}
+                  degree={people.fields.degree}
+                  email={people.fields.email}
+                  address={people.fields.address}
+                  postalCode={people.fields.postalCode}
+                  handleUpdateClick={handleUpdateClick}
+                ></ModalForm>
               </th>
             </tr>
           ))}
         </tbody>
       </table>
-    </>
+    </div>
   );
 }
 
