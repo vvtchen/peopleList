@@ -12,7 +12,7 @@ type FormState = {
 };
 const API_ENDPOINT = "http://127.0.0.1:8000/api/";
 
-function CreateNew() {
+const CreateNew = () => {
   const [formState, setFormState] = useState<FormState>({
     name: "",
     position: "",
@@ -36,21 +36,26 @@ function CreateNew() {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    // const csrf = getCookie("csrftoken");
-
-    const response = await fetch(`${API_ENDPOINT}createNew`, {
-      method: "POST",
-      body: JSON.stringify(formState),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const result = await response.json();
-    if (result.success) {
-      window.location.pathname = "/";
+    try {
+      const response = await fetch(`${API_ENDPOINT}createNew`, {
+        method: "POST",
+        body: JSON.stringify(formState),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (response.status !== 201) {
+        const result = await response.json();
+        window.alert(JSON.stringify(result));
+      } else {
+        const inform = window.confirm("資料已成功建立");
+        if (inform) {
+          window.location.pathname = "/";
+        }
+      }
+    } catch (error: any) {
+      throw new Error(`HTTP error! Status: ${error.message}`);
     }
-
-    // Handle form submission logic here (e.g., API call)
   };
 
   return (
@@ -168,6 +173,6 @@ function CreateNew() {
       </form>
     </div>
   );
-}
+};
 
 export default CreateNew;

@@ -5,23 +5,20 @@ import { useState, useEffect } from "react";
 import ModalForm from "./Modal";
 
 interface Person {
-  model: string;
   pk: number;
-  fields: {
-    name: string;
-    position: string;
-    department: string;
-    education: string;
-    degree: string;
-    email: string;
-    address: string;
-    postalCode: number;
-  };
+  name: string;
+  position: string;
+  department: string;
+  education: string;
+  degree: string;
+  email: string;
+  address: string;
+  postalCode: number;
 }
 
 const API_ENDPOINT = "http://127.0.0.1:8000/api/";
 
-function ListGroup() {
+const ListGroup = () => {
   const [lists, setLists] = useState<Person[]>([]);
 
   async function handleDeleteClick(pk: number): Promise<void> {
@@ -31,16 +28,8 @@ function ListGroup() {
       const response = await fetch(`${API_ENDPOINT}delete/${pk}`, {
         method: "DELETE",
       });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`error: ${error.message}`);
-      }
-      const result = await response.json();
-      console.log(result); // {success:true}
-      if (result.success) {
+      if (response.status === 204) {
         setLists(lists.filter((person) => person.pk !== pk));
-      } else {
-        console.log("Failed to delete");
       }
     }
   }
@@ -65,36 +54,34 @@ function ListGroup() {
       if (person.pk === pk) {
         return {
           ...person,
-          fields: {
-            ...person.fields,
-            ...target,
-          },
+          ...target,
         };
       }
       return person;
     });
-
     setLists(updatedLists);
   };
 
   useEffect(() => {
-    fetch(API_ENDPOINT + "all")
-      .then((response) => {
-        return response.json();
-      })
-      .then((data) => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(API_ENDPOINT + "all");
+        const data = await response.json();
+
+        console.log(data);
         if (Array.isArray(data)) {
           setLists(data);
         } else {
           throw new Error("Data format is incorrect");
         }
-      })
-      .catch((error) => {
+      } catch (error: any) {
         console.error(
           "There was a problem with the fetch operation:",
           error.message
         );
-      });
+      }
+    };
+    fetchData();
   }, []);
 
   return (
@@ -120,14 +107,14 @@ function ListGroup() {
           {lists.map((people) => (
             <tr key={people.pk}>
               <th scope="row">{people.pk}</th>
-              <th scope="row">{people.fields.name}</th>
-              <th scope="row">{people.fields.position}</th>
-              <th scope="row">{people.fields.department}</th>
-              <th scope="row">{people.fields.education}</th>
-              <th scope="row">{people.fields.degree}</th>
-              <th scope="row">{people.fields.email}</th>
-              <th scope="row">{people.fields.address}</th>
-              <th scope="row">{people.fields.postalCode}</th>
+              <th scope="row">{people.name}</th>
+              <th scope="row">{people.position}</th>
+              <th scope="row">{people.department}</th>
+              <th scope="row">{people.education}</th>
+              <th scope="row">{people.degree}</th>
+              <th scope="row">{people.email}</th>
+              <th scope="row">{people.address}</th>
+              <th scope="row">{people.postalCode}</th>
               <th scope="row">
                 <IconButton
                   aria-label="delete"
@@ -140,14 +127,14 @@ function ListGroup() {
 
                 <ModalForm
                   pk={people.pk}
-                  name={people.fields.name}
-                  position={people.fields.position}
-                  department={people.fields.department}
-                  education={people.fields.education}
-                  degree={people.fields.degree}
-                  email={people.fields.email}
-                  address={people.fields.address}
-                  postalCode={people.fields.postalCode}
+                  name={people.name}
+                  position={people.position}
+                  department={people.department}
+                  education={people.education}
+                  degree={people.degree}
+                  email={people.email}
+                  address={people.address}
+                  postalCode={people.postalCode}
                   handleUpdateClick={handleUpdateClick}
                 ></ModalForm>
               </th>
@@ -157,6 +144,6 @@ function ListGroup() {
       </table>
     </div>
   );
-}
+};
 
 export default ListGroup;

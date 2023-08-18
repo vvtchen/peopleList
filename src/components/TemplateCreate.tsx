@@ -56,23 +56,23 @@ const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         });
 
         if (checkTemplate(json as Object[]) && checkEmpty(json as Object[])) {
-          const response = await fetch(`${API_ENDPOINT}templateCreate`, {
-            method: "POST",
-            body: JSON.stringify(json),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-          const result = await response.json();
-          if (result.success && !result.issue) {
-            window.location.pathname = "/";
-          } else if (result.issue && result.success) {
-            window.alert(
-              `${JSON.stringify(result.message)}(${
-                result.issue.length
-              }比資料已重複儲存)：
-              ${JSON.stringify(result.issue)} `
-            );
+          try {
+            const response = await fetch(`${API_ENDPOINT}templateCreate`, {
+              method: "POST",
+              body: JSON.stringify(json),
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+            console.log(response.status);
+            if (response.status == 201) {
+              const inform = window.confirm("資料已成功建立");
+              if (inform) {
+                window.location.pathname = "/";
+              }
+            }
+          } catch (error: any) {
+            throw new Error(`HTTP error! Status: ${error.message}`);
           }
         } else if (!checkTemplate(json as Object[])) {
           window.alert(

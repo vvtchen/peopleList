@@ -76,7 +76,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
     const updateField: Partial<FormState> = {};
-
     Object.keys(formState).forEach((key: string) => {
       const ele = key as keyof FormState;
       if (formState[ele] !== originalState[ele]) {
@@ -93,21 +92,14 @@ const ModalForm: React.FC<ModalFormProps> = ({
             "Content-Type": "application/json",
           },
         });
-        if (!response.ok) {
-          throw new Error("HTTP Error: " + response.status);
-        }
-        const result = await response.json();
-        console.log(result.success);
-        if (result.success) {
+        if (response.status === 200) {
           handleUpdateClick(updateField, pk);
           setOriginalState(formState);
           setShow(false);
-        } else {
         }
       } catch (error: any) {
         throw new Error(`HTTP error! Status: ${error.message}`);
       }
-
       setOriginalState(formState);
       setShow(false);
     } else {
