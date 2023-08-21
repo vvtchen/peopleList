@@ -5,7 +5,7 @@ import { faExternalLink } from "@fortawesome/free-solid-svg-icons";
 import Modal from "react-bootstrap/Modal";
 import { IconButton } from "@mui/material";
 
-const API_ENDPOINT = "http://127.0.0.1:8000/api/";
+const API_ENDPOINT = window.location.origin + "/api";
 type ModalFormProps = {
   pk: number;
   name: string;
@@ -85,7 +85,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
     const size = Object.keys(updateField).length;
     if (size > 0) {
       try {
-        const response = await fetch(`${API_ENDPOINT}update/${pk}`, {
+        const response = await fetch(`${API_ENDPOINT}/update/${pk}`, {
           method: "PUT",
           body: JSON.stringify(updateField),
           headers: {

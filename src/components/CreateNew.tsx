@@ -10,7 +10,7 @@ type FormState = {
   address: string;
   postalCode: number | null;
 };
-const API_ENDPOINT = "http://127.0.0.1:8000/api/";
+const API_ENDPOINT = window.location.origin + "/api";
 
 const CreateNew = () => {
   const [formState, setFormState] = useState<FormState>({
@@ -37,7 +37,7 @@ const CreateNew = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const response = await fetch(`${API_ENDPOINT}createNew`, {
+      const response = await fetch(`${API_ENDPOINT}/createNew`, {
         method: "POST",
         body: JSON.stringify(formState),
         headers: {

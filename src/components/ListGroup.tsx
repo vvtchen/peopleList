@@ -16,7 +16,7 @@ interface Person {
   postalCode: number;
 }
 
-const API_ENDPOINT = "http://127.0.0.1:8000/api/";
+const API_ENDPOINT = window.location.origin + "/api";
 
 const ListGroup = () => {
   const [lists, setLists] = useState<Person[]>([]);
@@ -25,7 +25,7 @@ const ListGroup = () => {
     const check = window.confirm("確定是否要刪除此筆資料？");
     if (check) {
       console.log("Delete action called for:", pk);
-      const response = await fetch(`${API_ENDPOINT}delete/${pk}`, {
+      const response = await fetch(`${API_ENDPOINT}/delete/${pk}`, {
         method: "DELETE",
       });
       if (response.status === 204) {
@@ -65,7 +65,7 @@ const ListGroup = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(API_ENDPOINT + "all");
+        const response = await fetch(API_ENDPOINT + "/all");
         const data = await response.json();
 
         console.log(data);

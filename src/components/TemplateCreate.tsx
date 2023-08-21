@@ -1,7 +1,7 @@
 import * as xlsx from "xlsx";
 import TemplateExplain from "./TemplateExplain";
 
-const API_ENDPOINT = "http://127.0.0.1:8000/api/";
+const API_ENDPOINT = window.location.origin + "/api";
 
 const checkTemplate = (template: Object[]) => {
   const checker = [
@@ -57,7 +57,7 @@ const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 
         if (checkTemplate(json as Object[]) && checkEmpty(json as Object[])) {
           try {
-            const response = await fetch(`${API_ENDPOINT}templateCreate`, {
+            const response = await fetch(`${API_ENDPOINT}/templateCreate`, {
               method: "POST",
               body: JSON.stringify(json),
               headers: {
