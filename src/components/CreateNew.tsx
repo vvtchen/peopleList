@@ -48,10 +48,8 @@ const CreateNew = () => {
         const result = await response.json();
         window.alert(JSON.stringify(result));
       } else {
-        const inform = window.confirm("資料已成功建立");
-        if (inform) {
-          window.location.pathname = "/";
-        }
+        window.alert("資料已成功建立");
+        window.location.pathname = "/";
       }
     } catch (error: any) {
       throw new Error(`HTTP error! Status: ${error.message}`);

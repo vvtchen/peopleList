@@ -35,6 +35,19 @@ const checkEmpty = (template: Object[]) => {
   return true;
 };
 
+function uniqueObjects(template: Object[]): Object[] {
+  const uniqueItems = new Set<string>();
+  const result: Object[] = [];
+
+  for (const obj of template) {
+    const objStr = JSON.stringify(obj);
+    if (!uniqueItems.has(objStr)) {
+      uniqueItems.add(objStr);
+      result.push(obj);
+    }
+  }
+  return result;
+}
 const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
 
@@ -56,20 +69,19 @@ const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         });
 
         if (checkTemplate(json as Object[]) && checkEmpty(json as Object[])) {
+          const uniqueList = uniqueObjects(json as Object[]);
+          console.log(uniqueList);
           try {
             const response = await fetch(`${API_ENDPOINT}/templateCreate`, {
               method: "POST",
-              body: JSON.stringify(json),
+              body: JSON.stringify(uniqueList),
               headers: {
                 "Content-Type": "application/json",
               },
             });
-            console.log(response.status);
             if (response.status == 201) {
-              const inform = window.confirm("資料已成功建立");
-              if (inform) {
-                window.location.pathname = "/";
-              }
+              window.alert("資料已成功建立");
+              window.location.pathname = "/";
             }
           } catch (error: any) {
             throw new Error(`HTTP error! Status: ${error.message}`);
